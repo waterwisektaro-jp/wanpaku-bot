@@ -2,8 +2,8 @@ const express = require("express");
 const line = require("@line/bot-sdk");
 
 const config = {
-  channelAccessToken: process.env.Be1YuIjx3zsCT/vlSX61p2v9iAWv2QIJBlhQPjDhEdF4EHHnsOiy058X5pUkl/FU7cDpkJzHN7Ht4ZrIf7isHjHXOus2OcOpxfjdTThXyeO+H1Mi0g5suwmLm/1z7kP3WyI+lwwJiMzLe8PqlJ8ADwdB04t89/1O/w1cDnyilFU=,
-  channelSecret: process.env.0b3c6ab929344558a09aa72aebb0a538
+  channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
+  channelSecret: process.env.CHANNEL_SECRET
 };
 
 const app = express();
@@ -12,28 +12,29 @@ const client = new line.Client(config);
 // ユーザー回答保存
 const userState = {};
 
-// webhook
+// webhook（1つだけ）
 app.post("/webhook", line.middleware(config), async (req, res) => {
   try {
-    // 検証時は events が空でも 200 を返す
-    if (!req.body || !req.body.events || req.body.events.length === 0) {
-      return res.sendStatus(200);
-    }
-
-    const results = await Promise.all(req.body.events.map(handleEvent));
-    return res.json(results);
+    const events = req.body.events || [];
+    await Promise.all(events.map(handleEvent));
+    res.status(200).end();
   } catch (err) {
-    console.error("Webhook error:", err);
-    return res.sendStatus(500);
+    console.error(err);
+    res.status(500).end();
   }
 });
 
-function handleEvent(event) {
+async function handleEvent(event) {
+
   if (event.type !== "message" || event.message.type !== "text") {
-    return Promise.resolve(null);
+    return null;
   }
 
   const text = event.message.text;
+
+  // ----------------------
+  // 診断スタート
+  // ----------------------
 
   if (text === "ツアー診断") {
     return client.replyMessage(event.replyToken, {
@@ -51,7 +52,12 @@ function handleEvent(event) {
     });
   }
 
+  // ----------------------
+  // Q2
+  // ----------------------
+
   if (text === "子ども" || text === "親子" || text === "大人") {
+
     const userId = event.source.userId;
     userState[userId] = { q1: text };
 
@@ -69,7 +75,12 @@ function handleEvent(event) {
     });
   }
 
+  // ----------------------
+  // Q3（森）
+  // ----------------------
+
   if (text === "森") {
+
     const userId = event.source.userId;
     if (!userState[userId]) userState[userId] = {};
     userState[userId].q2 = text;
@@ -85,7 +96,12 @@ function handleEvent(event) {
     });
   }
 
+  // ----------------------
+  // Q3（海）
+  // ----------------------
+
   if (text === "海") {
+
     const userId = event.source.userId;
     if (!userState[userId]) userState[userId] = {};
     userState[userId].q2 = text;
@@ -104,7 +120,12 @@ function handleEvent(event) {
     });
   }
 
+  // ----------------------
+  // 診断結果（Q3）
+  // ----------------------
+
   if (text === "プライベート" || text === "グループ") {
+
     const userId = event.source.userId;
     if (!userState[userId]) userState[userId] = {};
 
@@ -114,7 +135,7 @@ function handleEvent(event) {
     const q2 = userState[userId].q2;
     const q3 = userState[userId].q3;
 
-    let result = "";
+    let result = " ";
 
     if (q2 === "海") {
       if ((q1 === "子ども" || q1 === "親子") && q3 === "グループ") {
