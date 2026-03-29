@@ -69,7 +69,7 @@ async function handleEvent(event) {
         text: "Q2. どんな自然体験をしたい？",
         actions: [
           { type: "message", label: "🌊 海で遊びたい", text: "海" },
-          { type: "message", label: "🏞 森・川で遊びたい", text: "森" }
+          { type: "message", label: "🏞 森・川で遊びたい(5月2日スタート)", text: "森" }
         ]
       }
     });
@@ -92,7 +92,7 @@ async function handleEvent(event) {
       text:
         "おすすめツアーは\n\n🌟" +
         result +
-        "です！\n\nやんばるの自然をダイレクトに体感できる、リバートレッキングツアーです！\n\n🌳ツアーの様子はこちら👇\nhttps://www.instagram.com/okuma.big_sup/"
+        "です！\n\nやんばるの自然をダイレクトに体感できる、リバートレッキングツアーです！\n\n🌳ツアーの様子はこちら（現在は開催していません。5月2日から開催します）👇\nhttps://www.instagram.com/okuma.big_sup/"
     });
   }
 
